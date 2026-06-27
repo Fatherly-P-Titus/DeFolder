@@ -1,0 +1,925 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Defolder - Extract Text from Folders</title>
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="utils/FA5/fa5/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- jQuery -->
+    <script src="utils/jquery.js"></script>
+    
+    <style>
+        /* ===== CSS Variables - Fire Brick Theme ===== */
+        :root {
+            --fire-brick: #B22222;
+            --fire-brick-dark: #8B1A1A;
+            --fire-brick-light: #D43A3A;
+            --fire-brick-glow: rgba(178, 34, 34, 0.3);
+            --fire-brick-glow-strong: rgba(178, 34, 34, 0.5);
+        }
+
+        /* ===== Reset & Base ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #111827, #1f2937, #111827);
+            color: #f3f4f6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== Custom Scrollbar ===== */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--fire-brick);
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--fire-brick-dark);
+        }
+
+        /* ===== Container ===== */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            width: 100%;
+        }
+
+        /* ===== Header / Logo ===== */
+        .header {
+            text-align: center;
+            padding: 40px 0 30px;
+        }
+
+        .logo-wrapper {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            background: linear-gradient(135deg, var(--fire-brick-dark), var(--fire-brick), var(--fire-brick-light));
+            padding: 20px 30px;
+            border-radius: 16px;
+            border: 2px solid var(--fire-brick);
+            box-shadow: 0 0 40px var(--fire-brick-glow);
+            margin-bottom: 25px;
+        }
+
+        .logo-wrapper i {
+            font-size: 42px;
+            color: white;
+        }
+
+        .logo-wrapper .fa-folder-open {
+            font-size: 48px;
+        }
+
+        .fa-flame {
+            animation: flicker 2s infinite;
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.05); }
+            25%, 75% { opacity: 0.9; transform: scale(0.98); }
+        }
+
+        /* ===== Hero Section ===== */
+        .hero {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .hero h1 {
+            font-size: 56px;
+            font-weight: 900;
+            letter-spacing: -2px;
+            margin-bottom: 10px;
+        }
+
+        .hero h1 .fire-text {
+            color: var(--fire-brick);
+            text-shadow: 0 0 30px var(--fire-brick-glow);
+        }
+
+        .hero h1 .white-text {
+            color: white;
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: #d1d5db;
+            max-width: 600px;
+            margin: 0 auto 15px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        .hero-badge .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--fire-brick);
+            border-radius: 50%;
+        }
+
+        /* ===== Main Card / Form ===== */
+        .main-card {
+            background: rgba(31, 41, 55, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 20px auto;
+            max-width: 700px;
+            border: 2px solid var(--fire-brick);
+            box-shadow: 0 0 40px var(--fire-brick-glow);
+        }
+
+        /* ===== Folder Picker Area ===== */
+        .folder-picker {
+            border: 2px dashed var(--fire-brick);
+            border-radius: 16px;
+            padding: 40px 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: rgba(178, 34, 34, 0.05);
+            cursor: pointer;
+        }
+
+        .folder-picker:hover {
+            background: rgba(178, 34, 34, 0.1);
+            border-color: var(--fire-brick-light);
+        }
+
+        .folder-picker i {
+            font-size: 56px;
+            color: var(--fire-brick);
+            margin-bottom: 15px;
+        }
+
+        .folder-picker h3 {
+            font-size: 20px;
+            color: white;
+            margin-bottom: 5px;
+        }
+
+        .folder-picker .sub-text {
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        /* ===== Buttons ===== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-fire {
+            background: linear-gradient(135deg, var(--fire-brick-dark), var(--fire-brick), var(--fire-brick-light));
+            box-shadow: 0 0 20px var(--fire-brick-glow);
+        }
+
+        .btn-fire:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 0 40px var(--fire-brick-glow-strong);
+        }
+
+        .btn-fire:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-block {
+            width: 100%;
+            justify-content: center;
+            padding: 16px;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        /* ===== Progress Bar ===== */
+        .progress-container {
+            display: none;
+            margin-top: 20px;
+            background: #1f2937;
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid var(--fire-brick);
+        }
+
+        .progress-container.active {
+            display: block;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .progress-header .status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--fire-brick-light);
+            font-weight: 600;
+        }
+
+        .progress-header .status i {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .progress-header .count {
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #374151;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar .fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--fire-brick-dark), var(--fire-brick), var(--fire-brick-light));
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .progress-file {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #9ca3af;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ===== Status Messages ===== */
+        .status-message {
+            display: none;
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-top: 15px;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+        }
+
+        .status-message.show {
+            display: flex;
+        }
+
+        .status-message.success {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid #22c55e;
+            color: #22c55e;
+        }
+
+        .status-message.error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+        }
+
+        .status-message i {
+            font-size: 20px;
+        }
+
+        /* ===== Features Section ===== */
+        .features {
+            padding: 50px 0 30px;
+        }
+
+        .features h2 {
+            text-align: center;
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 40px;
+        }
+
+        .features h2 .fire-text {
+            color: var(--fire-brick);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+        }
+
+        .feature-card {
+            background: rgba(31, 41, 55, 0.5);
+            border-radius: 16px;
+            padding: 30px 20px;
+            text-align: center;
+            border: 2px solid var(--fire-brick);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: scale(1.05);
+            background: rgba(31, 41, 55, 0.8);
+            box-shadow: 0 0 30px var(--fire-brick-glow);
+        }
+
+        .feature-card i {
+            font-size: 40px;
+            color: var(--fire-brick);
+            margin-bottom: 15px;
+        }
+
+        .feature-card h4 {
+            font-size: 18px;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .feature-card p {
+            font-size: 14px;
+            color: #9ca3af;
+            line-height: 1.5;
+        }
+
+        /* ===== Footer ===== */
+        .footer {
+            border-top: 1px solid rgba(178, 34, 34, 0.2);
+            padding: 30px 0;
+            margin-top: auto;
+            text-align: center;
+        }
+
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .footer-content .credit {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #9ca3af;
+            font-size: 15px;
+        }
+
+        .footer-content .credit i {
+            color: var(--fire-brick);
+        }
+
+        .footer-content .credit .name {
+            color: var(--fire-brick);
+            font-weight: 700;
+        }
+
+        .footer-content .copy {
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .footer-content .version {
+            display: inline-block;
+            border: 1px solid var(--fire-brick);
+            border-radius: 20px;
+            padding: 2px 14px;
+            color: var(--fire-brick-light);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 36px;
+            }
+            .hero p {
+                font-size: 16px;
+            }
+            .logo-wrapper {
+                padding: 15px 20px;
+            }
+            .logo-wrapper i {
+                font-size: 30px;
+            }
+            .logo-wrapper .fa-folder-open {
+                font-size: 34px;
+            }
+            .main-card {
+                padding: 25px 15px;
+            }
+            .features-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .folder-picker {
+                padding: 25px 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            .hero h1 {
+                font-size: 28px;
+            }
+            .btn {
+                font-size: 14px;
+                padding: 10px 20px;
+            }
+            .main-card {
+                padding: 15px 10px;
+            }
+        }
+
+        /* ===== Utilities ===== */
+        .mt-20 { margin-top: 20px; }
+        .mb-10 { margin-bottom: 10px; }
+        .text-center { text-align: center; }
+        .gap-10 { gap: 10px; }
+        .flex-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== HEADER ===== -->
+    <header class="header">
+        <div class="container">
+            <div class="logo-wrapper">
+                <i class="fas fa-folder-open"></i>
+                <i class="fas fa-fire fa-flame"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== HERO ===== -->
+    <section class="hero">
+        <div class="container">
+            <h1>
+                <span class="fire-text">Def</span><span class="white-text">older</span>
+            </h1>
+            <p>Extract all your code files into a single, organized text file</p>
+            <div class="hero-badge">
+                <span class="dot"></span>
+                Recursive File Extraction
+                <span class="dot"></span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== MAIN FORM ===== -->
+    <div class="container">
+        <div class="main-card" id="app">
+            
+            <!-- Folder Picker -->
+            <div class="folder-picker" id="folderPicker">
+                <i class="fas fa-folder-open"></i>
+                <h3 id="folderName">Select a folder to extract</h3>
+                <p class="sub-text" id="folderStatus">Click the button below to choose a folder</p>
+                <button class="btn btn-fire" id="chooseFolderBtn" style="margin-top: 15px;">
+                    <i class="fas fa-folder"></i>
+                    Choose Folder
+                </button>
+            </div>
+
+            <!-- Progress -->
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-header">
+                    <div class="status">
+                        <i class="fas fa-spinner"></i>
+                        <span>Extracting files...</span>
+                    </div>
+                    <span class="count" id="progressCount">0 / 0</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="fill" id="progressFill" style="width: 0%;"></div>
+                </div>
+                <div class="progress-file" id="progressFile">Starting...</div>
+            </div>
+
+            <!-- Extract Button -->
+            <button class="btn btn-fire btn-block" id="extractBtn" disabled>
+                <i class="fas fa-file-alt"></i>
+                Extract Files
+            </button>
+
+            <!-- Status Messages -->
+            <div class="status-message success" id="successMessage">
+                <i class="fas fa-check-circle"></i>
+                <span id="successText">Extraction complete! Download started.</span>
+            </div>
+
+            <div class="status-message error" id="errorMessage">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="errorText">An error occurred. Please try again.</span>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== FEATURES ===== -->
+    <section class="features">
+        <div class="container">
+            <h2>
+                <span class="fire-text">How</span> Defolder Works
+            </h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-sitemap"></i>
+                    <h4>Deep Traversal</h4>
+                    <p>Recursively visits every sub-folder and extracts all text files</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-file-code"></i>
+                    <h4>Smart Filtering</h4>
+                    <p>Automatically identifies and extracts text-based files only</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-bolt"></i>
+                    <h4>Lightning Fast</h4>
+                    <p>Processes files efficiently with real-time progress tracking</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-download"></i>
+                    <h4>Instant Download</h4>
+                    <p>Get your organized text file immediately after extraction</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="credit">
+                    <i class="fas fa-fire"></i>
+                    <span>Developed by <span class="name">Fatherly P. Titus</span></span>
+                </div>
+                <div class="copy">
+                    &copy; 2026 Defolder. All rights reserved.
+                </div>
+                <span class="version">v1.0.0</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ============================================================ -->
+    <!-- ===== JAVASCRIPT ===== -->
+    <!-- ============================================================ -->
+    <script>
+        $(document).ready(function() {
+
+            // ===== State =====
+            let selectedDirHandle = null;
+            let isProcessing = false;
+            let currentFolderName = '';
+            let fileCount = 0;
+
+            // ===== DOM References =====
+            const $folderPicker = $('#folderPicker');
+            const $folderName = $('#folderName');
+            const $folderStatus = $('#folderStatus');
+            const $chooseBtn = $('#chooseFolderBtn');
+            const $extractBtn = $('#extractBtn');
+            const $progressContainer = $('#progressContainer');
+            const $progressCount = $('#progressCount');
+            const $progressFill = $('#progressFill');
+            const $progressFile = $('#progressFile');
+            const $successMsg = $('#successMessage');
+            const $errorMsg = $('#errorMessage');
+            const $successText = $('#successText');
+            const $errorText = $('#errorText');
+
+            // ===== Helper Functions =====
+            function hideAllMessages() {
+                $successMsg.removeClass('show').hide();
+                $errorMsg.removeClass('show').hide();
+            }
+
+            function showError(message) {
+                hideAllMessages();
+                $errorText.text(message);
+                $errorMsg.addClass('show').show();
+            }
+
+            function showSuccess(message) {
+                hideAllMessages();
+                $successText.text(message);
+                $successMsg.addClass('show').show();
+            }
+
+            function resetUI() {
+                hideAllMessages();
+                $progressContainer.removeClass('active');
+                $progressFill.css('width', '0%');
+                $progressCount.text('0 / 0');
+                $progressFile.text('Starting...');
+            }
+
+            function updateProgress(current, total, file) {
+                const percent = total > 0 ? (current / total) * 100 : 0;
+                $progressFill.css('width', percent + '%');
+                $progressCount.text(current + ' / ' + total);
+                $progressFile.text(file || 'Processing...');
+            }
+
+            function enableExtractButton() {
+                $extractBtn.prop('disabled', false);
+                console.log('Extract button enabled'); // Debug log
+            }
+
+            function disableExtractButton() {
+                $extractBtn.prop('disabled', true);
+            }
+
+            // ===== Check Browser Support =====
+            function checkSupport() {
+                if (!('showDirectoryPicker' in window)) {
+                    showError('Your browser does not support folder selection. Please use Chrome, Edge, or Opera.');
+                    $chooseBtn.prop('disabled', true);
+                    return false;
+                }
+                return true;
+            }
+
+            // ===== Count Files in Directory =====
+            async function countFiles(dirHandle) {
+                let count = 0;
+                for await (const entry of dirHandle.values()) {
+                    if (entry.kind === 'directory') {
+                        count += await countFiles(entry);
+                    } else {
+                        count++;
+                    }
+                }
+                return count;
+            }
+
+            // ===== Check if file is text =====
+            function isTextFile(fileName) {
+                const textExtensions = [
+                    '.txt', '.ts', '.tsx', '.js', '.jsx', '.css', '.scss', 
+                    '.html', '.md', '.json', '.xml', '.yaml', '.yml', '.py', 
+                    '.rb', '.go', '.rs', '.c', '.cpp', '.h', '.hpp', '.java', 
+                    '.kt', '.swift', '.php', '.rb', '.vue', '.svelte'
+                ];
+                return textExtensions.some(ext => fileName.toLowerCase().endsWith(ext));
+            }
+
+            // ===== Traverse & Extract =====
+            async function processDirectory(dirHandle, path = '', onProgress) {
+                const results = [];
+                const files = [];
+
+                // Collect all text files
+                async function collectFiles(handle, currentPath) {
+                    for await (const entry of handle.values()) {
+                        const entryPath = currentPath ? currentPath + '/' + entry.name : entry.name;
+                        if (entry.kind === 'directory') {
+                            await collectFiles(entry, entryPath);
+                        } else if (entry.kind === 'file' && isTextFile(entry.name)) {
+                            files.push({ handle: entry, path: entryPath });
+                        }
+                    }
+                }
+
+                await collectFiles(dirHandle, path);
+
+                const total = files.length;
+                let processed = 0;
+
+                for (const { handle, path: filePath } of files) {
+                    try {
+                        const file = await handle.getFile();
+                        const content = await file.text();
+                        results.push({
+                            filePath: filePath,
+                            content: content,
+                            error: null
+                        });
+                    } catch (err) {
+                        results.push({
+                            filePath: filePath,
+                            content: '',
+                            error: err.message || 'Unknown error'
+                        });
+                    }
+                    processed++;
+                    if (onProgress) {
+                        onProgress(processed, total, filePath);
+                    }
+                }
+
+                return results;
+            }
+
+            // ===== Format Results =====
+            function formatResults(results) {
+                let output = '';
+                // Sort by file path
+                const sorted = [...results].sort((a, b) => a.filePath.localeCompare(b.filePath));
+
+                for (const result of sorted) {
+                    output += '•) ' + result.filePath + ':\n';
+                    if (result.error) {
+                        output += '/* Error: ' + result.error + ' */\n\n';
+                    } else {
+                        output += '/* texts from ' + result.filePath + ' */\n';
+                        output += result.content;
+                        output += '\n\n';
+                    }
+                }
+                return output;
+            }
+
+            // ===== Generate filename =====
+            function generateFileName() {
+                const now = new Date();
+                const timestamp = now.getFullYear() +
+                    String(now.getMonth() + 1).padStart(2, '0') +
+                    String(now.getDate()).padStart(2, '0') + '_' +
+                    String(now.getHours()).padStart(2, '0') +
+                    String(now.getMinutes()).padStart(2, '0');
+                return 'extracted_' + timestamp + '.txt';
+            }
+
+            // ===== Download File =====
+            function downloadFile(content, filename) {
+                const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+            }
+
+            // ===== Choose Folder =====
+            $chooseBtn.on('click', async function(e) {
+                e.stopPropagation(); // Prevent event bubbling
+                
+                if (!checkSupport()) return;
+
+                try {
+                    const dirHandle = await window.showDirectoryPicker();
+                    selectedDirHandle = dirHandle;
+                    currentFolderName = dirHandle.name;
+
+                    $folderName.text(currentFolderName);
+                    $folderStatus.text('Loading file count...');
+                    $chooseBtn.html('<i class="fas fa-spinner fa-spin"></i> Loading...');
+                    $chooseBtn.prop('disabled', true);
+                    
+                    // Disable extract while loading
+                    disableExtractButton();
+
+                    // Count files
+                    const totalFiles = await countFiles(dirHandle);
+                    fileCount = totalFiles;
+                    $folderStatus.text(totalFiles + ' files found');
+                    
+                    // Enable the extract button now
+                    enableExtractButton();
+                    
+                    $chooseBtn.html('<i class="fas fa-folder"></i> Change Folder');
+                    $chooseBtn.prop('disabled', false);
+                    
+                    hideAllMessages();
+                    resetUI();
+
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        showError('Failed to select folder: ' + err.message);
+                    }
+                    $chooseBtn.html('<i class="fas fa-folder"></i> Choose Folder');
+                    $chooseBtn.prop('disabled', false);
+                    disableExtractButton();
+                }
+            });
+
+            // ===== Extract =====
+            $extractBtn.on('click', async function() {
+                if (!selectedDirHandle) {
+                    showError('Please select a folder first.');
+                    return;
+                }
+
+                if (isProcessing) return;
+
+                isProcessing = true;
+                disableExtractButton();
+                $chooseBtn.prop('disabled', true);
+                hideAllMessages();
+
+                // Show progress
+                $progressContainer.addClass('active');
+                $progressFill.css('width', '0%');
+                $progressCount.text('0 / ' + fileCount);
+                $progressFile.text('Preparing...');
+
+                try {
+                    const results = await processDirectory(
+                        selectedDirHandle,
+                        '',
+                        function(processed, total, file) {
+                            updateProgress(processed, total, file);
+                        }
+                    );
+
+                    // Format and download
+                    const formatted = formatResults(results);
+                    const filename = generateFileName();
+                    downloadFile(formatted, filename);
+
+                    // Success
+                    showSuccess('Extraction complete! ' + results.length + ' files processed. Download started.');
+                    $progressFile.text('Done! ' + results.length + ' files extracted.');
+
+                } catch (err) {
+                    showError('Extraction failed: ' + err.message);
+                    console.error(err);
+                } finally {
+                    isProcessing = false;
+                    // Re-enable the extract button if we still have a folder selected
+                    if (selectedDirHandle) {
+                        enableExtractButton();
+                    }
+                    $chooseBtn.prop('disabled', false);
+                }
+            });
+
+            // ===== Click on folder picker to choose =====
+            $folderPicker.on('click', function(e) {
+                // Don't trigger if clicking the button directly (it will handle itself)
+                if (!$(e.target).closest('button').length) {
+                    $chooseBtn.click();
+                }
+            });
+
+            // ===== Init =====
+            checkSupport();
+            
+            // Ensure extract button starts disabled
+            disableExtractButton();
+            console.log('Defolder initialized. Extract button is disabled by default.');
+
+        });
+    </script>
+
+</body>
+</html>
+
+
+
+
